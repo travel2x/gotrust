@@ -1,10 +1,12 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 var configFile = ""
 var rootCmd = cobra.Command{
-	Use: "auservice",
+	Use: "gotrust",
 	Run: func(cmd *cobra.Command, args []string) {
 		serve(cmd.Context())
 	},

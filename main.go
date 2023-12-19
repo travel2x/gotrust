@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/travel2x/auservice/cmd"
-	"github.com/travel2x/auservice/internal/api"
+	"github.com/travel2x/gotrust/cmd"
+	"github.com/travel2x/gotrust/internal/api"
 )
 
 func main() {
