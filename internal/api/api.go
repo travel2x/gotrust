@@ -78,7 +78,7 @@ type HealthCheckResponse struct {
 func (a *API) HealthCheck(w http.ResponseWriter, r *http.Request) error {
 	return sendJSON(w, http.StatusOK, HealthCheckResponse{
 		Version:     a.version,
-		Name:        "GoTrue",
-		Description: "GoTrue is a user registration and authentication API",
+		Name:        "GoTrust",
+		Description: "GoTrust is a user registration and authentication API",
 	})
 }
