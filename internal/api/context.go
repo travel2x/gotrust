@@ -43,8 +43,28 @@ func withRequestToken(ctx context.Context, token string) context.Context {
 	return context.WithValue(ctx, oauthTokenKey, token)
 }
 
+func withInviteToken(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, inviteTokenKey, token)
+}
+
+func withReferrer(ctx context.Context, referrer string) context.Context {
+	return context.WithValue(ctx, externalReferrerKey, referrer)
+}
+
+func withFlowStateID(ctx context.Context, id string) context.Context {
+	return context.WithValue(ctx, flowStateKey, id)
+}
+
 func withOAuthVerifier(ctx context.Context, token string) context.Context {
 	return context.WithValue(ctx, oauthVerifierKey, token)
+}
+
+func withExternalProviderType(ctx context.Context, provider string) context.Context {
+	return context.WithValue(ctx, externalProviderTypeKey, provider)
+}
+
+func withSignature(ctx context.Context, signature string) context.Context {
+	return context.WithValue(ctx, signatureKey, signature)
 }
 
 func getExternalReferrer(ctx context.Context) string {
@@ -54,4 +74,12 @@ func getExternalReferrer(ctx context.Context) string {
 	}
 
 	return obj.(string)
+}
+
+func getRequestID(ctx context.Context) string {
+	val := ctx.Value(requestIDKey)
+	if val == nil {
+		return ""
+	}
+	return val.(string)
 }

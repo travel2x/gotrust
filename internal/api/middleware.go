@@ -42,28 +42,3 @@ func (a *API) isValidExternalHost(w http.ResponseWriter, req *http.Request) (con
 	}
 	return withExternalHost(ctx, u), nil
 }
-
-func (a *API) loadFlowState(w http.ResponseWriter, r *http.Request) (context.Context, error) {
-	var state string
-	if r.Method == http.MethodPost {
-		state = r.FormValue("state")
-	} else {
-		state = r.URL.Query().Get("state")
-	}
-
-	if state == "" {
-		return nil, badRequestError("OAuth state parameter missing")
-	}
-
-	ctx := r.Context()
-	oauthToken := r.URL.Query().Get("oauth_token")
-	if oauthToken != "" {
-		ctx = withRequestToken(ctx, oauthToken)
-	}
-	oauthVerifier := r.URL.Query().Get("oauth_verifier")
-	if oauthVerifier != "" {
-		ctx = withOAuthVerifier(ctx, oauthVerifier)
-	}
-	//return a.loadExternalState(ctx, state) // i will be back to this later
-	return ctx, nil
-}

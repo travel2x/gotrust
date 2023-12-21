@@ -6,6 +6,14 @@ import (
 	"net/http"
 )
 
+var OAuthErrorMap = map[int]string{
+	http.StatusBadRequest:          "invalid_request",
+	http.StatusUnauthorized:        "unauthorized_client",
+	http.StatusForbidden:           "access_denied",
+	http.StatusInternalServerError: "server_error",
+	http.StatusServiceUnavailable:  "temporarily_unavailable",
+}
+
 type HTTPError struct {
 	Code            int    `json:"code"`
 	Message         string `json:"msg"`
@@ -45,6 +53,40 @@ func (e *HTTPError) WithInternalMessage(fmtString string, args ...interface{}) *
 	return e
 }
 
+type OAuthError struct {
+	Err             string `json:"error"`
+	Description     string `json:"error_description,omitempty"`
+	InternalError   error  `json:"-"`
+	InternalMessage string `json:"-"`
+}
+
+func (e *OAuthError) Error() string {
+	if e.InternalMessage != "" {
+		return e.InternalMessage
+	}
+	return fmt.Sprintf("%s: %s", e.Err, e.Description)
+}
+
+// WithInternalError adds internal error information to the error
+func (e *OAuthError) WithInternalError(err error) *OAuthError {
+	e.InternalError = err
+	return e
+}
+
+// WithInternalMessage adds internal message information to the error
+func (e *OAuthError) WithInternalMessage(fmtString string, args ...interface{}) *OAuthError {
+	e.InternalMessage = fmt.Sprintf(fmtString, args...)
+	return e
+}
+
+// Cause returns the root cause error
+func (e *OAuthError) Cause() error {
+	if e.InternalError != nil {
+		return e.InternalError
+	}
+	return e
+}
+
 func httpError(code int, fmtString string, args ...interface{}) *HTTPError {
 	return &HTTPError{
 		Code:    code,
@@ -79,4 +121,9 @@ func recoverer(w http.ResponseWriter, r *http.Request) (context.Context, error) 
 
 func badRequestError(fmtString string, args ...interface{}) *HTTPError {
 	return httpError(http.StatusBadRequest, fmtString, args...)
+}
+
+// ErrorCause is an error interface that contains the method Cause() for returning root cause errors
+type ErrorCause interface {
+	Cause() error
 }
