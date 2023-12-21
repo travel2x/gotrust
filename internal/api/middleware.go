@@ -3,9 +3,19 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"net/http"
 	"net/url"
 )
+
+type FunctionHooks map[string][]string
+
+type AuthMicroserviceClaims struct {
+	jwt.StandardClaims
+	SiteURL       string        `json:"site_url"`
+	InstanceID    string        `json:"id"`
+	FunctionHooks FunctionHooks `json:"function_hooks"`
+}
 
 func (a *API) isValidExternalHost(w http.ResponseWriter, req *http.Request) (context.Context, error) {
 	ctx := req.Context()
