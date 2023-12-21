@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/travel2x/gotrust/internal/models"
 	"net/url"
 )
 
@@ -65,6 +66,10 @@ func withExternalProviderType(ctx context.Context, provider string) context.Cont
 
 func withSignature(ctx context.Context, signature string) context.Context {
 	return context.WithValue(ctx, signatureKey, signature)
+}
+
+func withTargetUser(ctx context.Context, u *models.User) context.Context {
+	return context.WithValue(ctx, targetUserKey, u)
 }
 
 func getExternalReferrer(ctx context.Context) string {

@@ -23,11 +23,11 @@ type ExternalProviderClaims struct {
 }
 
 func (a *API) ExternalProviderRedirect(w http.ResponseWriter, r *http.Request) error {
-	url, err := a.GetExternalProviderRedirectURL(w, r, nil)
+	redirectURL, err := a.GetExternalProviderRedirectURL(w, r, nil)
 	if err != nil {
 		return err
 	}
-	http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 	return nil
 }
 
@@ -133,7 +133,14 @@ func (a *API) loadExternalState(ctx context.Context, state string) (context.Cont
 			return nil, badRequestError("invalid target user id")
 		}
 		fmt.Printf("linkingTargetUserID: %v", linkingTargetUserID)
-		//u, err := models.FindUserByID(a.db, linkingTargetUserID)
+		u, err := models.FindUserByID(linkingTargetUserID)
+		if err != nil {
+			if models.IsNotFoundError(err) {
+				return nil, notFoundError("Linking target user not found")
+			}
+			return nil, internalServerError("Database error loading user").WithInternalError(err)
+		}
+		ctx = withTargetUser(ctx, u)
 	}
 	ctx = withExternalProviderType(ctx, claims.Provider)
 	return withSignature(ctx, state), nil

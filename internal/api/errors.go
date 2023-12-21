@@ -119,11 +119,19 @@ func recoverer(w http.ResponseWriter, r *http.Request) (context.Context, error) 
 	return nil, nil
 }
 
+// ErrorCause is an error interface that contains the method Cause() for returning root cause errors
+type ErrorCause interface {
+	Cause() error
+}
+
 func badRequestError(fmtString string, args ...interface{}) *HTTPError {
 	return httpError(http.StatusBadRequest, fmtString, args...)
 }
 
-// ErrorCause is an error interface that contains the method Cause() for returning root cause errors
-type ErrorCause interface {
-	Cause() error
+func notFoundError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusNotFound, fmtString, args...)
+}
+
+func internalServerError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusInternalServerError, fmtString, args...)
 }
