@@ -15,3 +15,6 @@ build: deps ## Build the binary.
 deps: ## Install dependencies.
 	@go mod download
 	@go mod verify
+
+migrate_dev: ## Run database migrations for development.
+	hack/migrate.sh postgres

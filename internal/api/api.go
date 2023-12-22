@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
 	"github.com/sebest/xff"
@@ -52,6 +53,7 @@ func NewAPIWithVersion(ctx context.Context, globalConfig *conf.GlobalConfigurati
 
 	r.Get("/health", api.HealthCheck)
 	r.Route("/callback", func(r *Router) {
+		fmt.Println("callback")
 		r.Use(api.isValidExternalHost)
 		r.Use(api.loadFlowState)
 
@@ -83,3 +85,5 @@ func (a *API) HealthCheck(w http.ResponseWriter, r *http.Request) error {
 		Description: "GoTrust is a user registration and authentication API",
 	})
 }
+
+// https://accounts.google.com/o/oauth2/v2/auth?scope=openid profile email&response_type=token&client_id=186080426755-12k8311kbtknbkfvm3sd3mtvdmtrc5qp.apps.googleusercontent.com&redirect_uri=http://localhost:8000/callback&state=test

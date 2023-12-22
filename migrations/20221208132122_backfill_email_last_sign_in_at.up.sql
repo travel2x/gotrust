@@ -7,4 +7,4 @@ update {{ index .Options "Namespace" }}.identities
     created_at = '2022-11-25' and
     updated_at = '2022-11-25' and
     provider = 'email' and
-    id = user_id::text;
+    id = user_id::uuid;
