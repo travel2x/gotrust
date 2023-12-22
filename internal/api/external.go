@@ -8,6 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/travel2x/gotrust/internal/api/provider"
 	"github.com/travel2x/gotrust/internal/models"
+	"github.com/travel2x/gotrust/internal/utilities"
+	"github.com/travel2x/gotrust/internal/observability"
 	"net/http"
 	"net/url"
 	"strings"
@@ -75,9 +77,10 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 
 func (a *API) redirectErrors(handler apiHandler, w http.ResponseWriter, r *http.Request, u *url.URL) {
 	ctx := r.Context()
+	log := observability.GetLogEntry(r)
 	errorID := getRequestID(ctx)
 	if err := handler(w, r); err != nil {
-		q := getErrorQueryString(err, errorID, u.Query(), nil)
+		q := getErrorQueryString(err, errorID, u.Query(), log)
 		u.RawQuery = q.Encode()
 		// TODO: deprecate returning error details in the query fragment
 		hd := url.Values{}
@@ -156,29 +159,29 @@ func getErrorQueryString(err error, errorID string, q url.Values, log logrus.Fie
 		}
 		if e.Code >= http.StatusInternalServerError {
 			e.ErrorID = errorID
-			// log.WithError(e.Cause()).Error(e.Error())
+			log.WithError(e.Cause()).Error(e.Error())
 		} else {
-			// log.WithError(e.Cause()).Info(e.Error())
+			log.WithError(e.Cause()).Info(e.Error())
 		}
 		q.Set("error_description", e.Message)
 		q.Set("error_code", fmt.Sprintf("%d", e.Code))
 	case *OAuthError:
 		q.Set("error", e.Err)
 		q.Set("error_description", e.Description)
-	// log.WithError(e.Cause()).Info(e.Error())
+		log.WithError(e.Cause()).Info(e.Error())
 	case ErrorCause:
 		return getErrorQueryString(e.Cause(), errorID, q, log)
 	default:
-		eType, eDescription := "server_error", err.Error()
+		errorType, errorDescription := "server_error", err.Error()
 		// Provide better error messages for certain user-triggered Postgres errors.
-		//if pgErr := utilities.NewPostgresError(e); pgErr != nil {
-		//	error_description = pgErr.Message
-		//	if oauthErrorType, ok := oauthErrorMap[pgErr.HttpStatusCode]; ok {
-		//		error_type = oauthErrorType
-		//	}
-		//}
-		q.Set("error", eType)
-		q.Set("error_description", eDescription)
+		if pgErr := utilities.NewPostgresError(e); pgErr != nil {
+			errorDescription = pgErr.Message
+			if oauthErrorType, ok := oauthErrorMap[pgErr.HttpStatusCode]; ok {
+				errorType = oauthErrorType
+			}
+		}
+		q.Set("error", errorType)
+		q.Set("error_description", errorDescription)
 
 	}
 	return &q
