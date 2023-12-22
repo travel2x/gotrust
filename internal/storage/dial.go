@@ -1,17 +1,17 @@
 package storage
 
 import (
+	"context"
+	"github.com/XSAM/otelsql"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/columns"
-	"github.com/travel2x/gotrust/internal/conf"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/XSAM/otelsql"
-	"github.com/jmoiron/sqlx"
+	"github.com/travel2x/gotrust/internal/conf"
+	"net/url"
 	"reflect"
 	"time"
-	"context"
-	"net/url"
 )
 
 type Connection struct {
@@ -35,9 +35,9 @@ func NewCommitWithError(err error) error {
 }
 
 func Dial(config *conf.GlobalConfiguration) (*Connection, error) {
-	if config.DB.Driver == "" && config.DB.URL {
-		u, err :=  url.Parse(config.DB.URL)
-		if err != nil  {
+	if config.DB.Driver == "" && config.DB.URL != "" {
+		u, err := url.Parse(config.DB.URL)
+		if err != nil {
 			return nil, errors.Wrap(err, "Error parsing database URL")
 		}
 		config.DB.Driver = u.Scheme
@@ -61,7 +61,7 @@ func Dial(config *conf.GlobalConfiguration) (*Connection, error) {
 		}
 	}
 
-	options := make(map[string]interface{})
+	options := make(map[string]string)
 	if config.DB.HealthCheckPeriod != time.Duration(0) {
 		options["pool_health_check_period"] = config.DB.HealthCheckPeriod.String()
 	}
@@ -70,13 +70,13 @@ func Dial(config *conf.GlobalConfiguration) (*Connection, error) {
 	}
 
 	db, err := pop.NewConnection(&pop.ConnectionDetails{
-		Dialect: 			config.DB.Driver,
-		Driver:  			driver,
-		URL:     			config.DB.URL,
-		Pool:				config.DB.MaxPoolSize,
-		IdlePool:			config.DB.MaxIdlePoolSize,
-		ConnMaxLifetime:	config.DB.ConnMaxLifetime,
-		Options:			options,
+		Dialect:         config.DB.Driver,
+		Driver:          driver,
+		URL:             config.DB.URL,
+		Pool:            config.DB.MaxPoolSize,
+		IdlePool:        config.DB.MaxIdlePoolSize,
+		ConnMaxLifetime: config.DB.ConnMaxLifetime,
+		Options:         options,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "opening database connection")
@@ -90,7 +90,7 @@ func Dial(config *conf.GlobalConfiguration) (*Connection, error) {
 func (c *Connection) Transaction(fn func(*Connection) error) error {
 	if c.TX != nil {
 		var returnErr error
-		if terr:= c.Connection.Transaction(func(tx *pop.Connection) error {
+		if terr := c.Connection.Transaction(func(tx *pop.Connection) error {
 			err := fn(&Connection{tx})
 			switch err.(type) {
 			case *CommitWithError:

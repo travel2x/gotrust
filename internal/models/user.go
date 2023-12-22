@@ -2,14 +2,14 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 	"github.com/travel2x/gotrust/internal/crypto"
 	"github.com/travel2x/gotrust/internal/storage"
 	"strings"
 	"time"
-	"database/sql"
-	"github.com/pkg/errors"
 )
 
 type User struct {
@@ -166,7 +166,6 @@ func (u *User) GetPhone() string {
 func FindUserByID(tx *storage.Connection, id uuid.UUID) (*User, error) {
 	return findUser(tx, "instance_id = ? and id = ?", uuid.Nil, id)
 }
-
 
 func findUser(tx *storage.Connection, query string, args ...interface{}) (*User, error) {
 	u := &User{}

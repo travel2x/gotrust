@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/travel2x/gotrust/internal/api/provider"
 	"github.com/travel2x/gotrust/internal/models"
-	"github.com/travel2x/gotrust/internal/utilities"
 	"github.com/travel2x/gotrust/internal/observability"
+	"github.com/travel2x/gotrust/internal/utilities"
 	"net/http"
 	"net/url"
 	"strings"
@@ -136,7 +136,7 @@ func (a *API) loadExternalState(ctx context.Context, state string) (context.Cont
 			return nil, badRequestError("invalid target user id")
 		}
 		fmt.Printf("linkingTargetUserID: %v", linkingTargetUserID)
-		u, err := models.FindUserByID(linkingTargetUserID)
+		u, err := models.FindUserByID(a.db, linkingTargetUserID)
 		if err != nil {
 			if models.IsNotFoundError(err) {
 				return nil, notFoundError("Linking target user not found")
@@ -176,7 +176,7 @@ func getErrorQueryString(err error, errorID string, q url.Values, log logrus.Fie
 		// Provide better error messages for certain user-triggered Postgres errors.
 		if pgErr := utilities.NewPostgresError(e); pgErr != nil {
 			errorDescription = pgErr.Message
-			if oauthErrorType, ok := oauthErrorMap[pgErr.HttpStatusCode]; ok {
+			if oauthErrorType, ok := OAuthErrorMap[pgErr.HttpStatusCode]; ok {
 				errorType = oauthErrorType
 			}
 		}

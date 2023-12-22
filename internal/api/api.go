@@ -6,6 +6,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/sebest/xff"
 	"github.com/travel2x/gotrust/internal/conf"
+	"github.com/travel2x/gotrust/internal/storage"
 	"net/http"
 	"time"
 )
@@ -17,7 +18,7 @@ const (
 
 type API struct {
 	handler http.Handler
-	db      *struct{}
+	db      *storage.Connection
 	config  *conf.GlobalConfiguration
 	version string
 
@@ -31,11 +32,11 @@ func (a *API) Now() time.Time {
 	return time.Now()
 }
 
-func NewAPI(globalConfig *conf.GlobalConfiguration, db *struct{}) *API {
+func NewAPI(globalConfig *conf.GlobalConfiguration, db *storage.Connection) *API {
 	return NewAPIWithVersion(context.Background(), globalConfig, db, defaultVersion)
 }
 
-func NewAPIWithVersion(ctx context.Context, globalConfig *conf.GlobalConfiguration, db *struct{}, version string) *API {
+func NewAPIWithVersion(ctx context.Context, globalConfig *conf.GlobalConfiguration, db *storage.Connection, version string) *API {
 	api := &API{
 		config:  globalConfig,
 		db:      db,

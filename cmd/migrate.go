@@ -15,10 +15,10 @@ import (
 var migrateCmd = cobra.Command{
 	Use:  "migrate",
 	Long: "Migrate database strucutures. This will create new tables and add missing columns and indexes.",
-	Run: migrate,
+	Run:  migrate,
 }
 
-func migrate(cmd *cobra.Command, args []string){
+func migrate(cmd *cobra.Command, args []string) {
 	globalConfig := loadGlobalConfig(cmd.Context())
 	if globalConfig.DB.Driver == "" && globalConfig.DB.URL != "" {
 		u, err := url.Parse(globalConfig.DB.URL)
@@ -96,7 +96,7 @@ func migrate(cmd *cobra.Command, args []string){
 
 	log.Debugf("after status")
 	if log.Level == logrus.DebugLevel {
-		err = mig.Status(os.Stdout)
+		err = migrations.Status(os.Stdout)
 		if err != nil {
 			log.Fatalf("%+v", errors.Wrap(err, "migration status"))
 		}

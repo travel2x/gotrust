@@ -11,7 +11,7 @@ import (
 
 var (
 	sessionName = "_gotrust_session"
-	Store sessions.Store
+	Store       sessions.Store
 )
 
 type SessionConfig struct {
@@ -20,7 +20,7 @@ type SessionConfig struct {
 
 func init() {
 	var sessionConfig SessionConfig
-	if err := envconfig.Process("GOTRUST_SESSION_KEY"); err != nil || len(sessionConfig.Key) == 0 {
+	if err := envconfig.Process("GOTRUST_SESSION_KEY", &sessionConfig); err != nil || len(sessionConfig.Key) == 0 {
 		sessionConfig.Key = securecookie.GenerateRandomKey(32)
 	}
 	Store = sessions.NewCookieStore(sessionConfig.Key)

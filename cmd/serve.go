@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/travel2x/gotrust/internal/api"
+	"github.com/travel2x/gotrust/internal/storage"
 	"github.com/travel2x/gotrust/internal/utilities"
 	"net"
 
@@ -24,10 +25,15 @@ func serve(ctx context.Context) {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to load config")
 	}
-	db := &struct{}{} // temporary stub
-	addr := net.JoinHostPort(config.API.Host, config.API.Port)
 
+	db, err := storage.Dial(config)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to load config")
+	}
+
+	addr := net.JoinHostPort(config.API.Host, config.API.Port)
 	serv := api.NewAPIWithVersion(ctx, config, db, utilities.Version)
 	logrus.Info("GoTrust API started on: %s", addr)
+
 	serv.ListenAndServe(ctx, addr)
 }
