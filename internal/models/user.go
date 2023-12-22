@@ -8,6 +8,8 @@ import (
 	"github.com/travel2x/gotrust/internal/storage"
 	"strings"
 	"time"
+	"database/sql"
+	"github.com/pkg/errors"
 )
 
 type User struct {
@@ -161,6 +163,18 @@ func (u *User) GetPhone() string {
 	return string(u.Phone)
 }
 
-func FindUserByID(id uuid.UUID) (*User, error) {
-	return nil, nil
+func FindUserByID(tx *storage.Connection, id uuid.UUID) (*User, error) {
+	return findUser(tx, "instance_id = ? and id = ?", uuid.Nil, id)
+}
+
+
+func findUser(tx *storage.Connection, query string, args ...interface{}) (*User, error) {
+	u := &User{}
+	if err := tx.Eager().Q().Where(query, args...).First(u); err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return nil, UserNotFoundError{}
+		}
+		return nil, errors.Wrap(err, "error finding user")
+	}
+	return u, nil
 }
