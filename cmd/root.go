@@ -9,7 +9,7 @@ import (
 
 var configFile = ""
 var rootCmd = cobra.Command{
-	Use: "GoTrust",
+	Use: "gotrust",
 	Run: func(cmd *cobra.Command, args []string) {
 		migrate(cmd, args)
 		serve(cmd.Context())

@@ -10,9 +10,11 @@ import (
 	"github.com/travel2x/gotrust/internal/models"
 	"github.com/travel2x/gotrust/internal/observability"
 	"github.com/travel2x/gotrust/internal/utilities"
+	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type ExternalProviderClaims struct {
@@ -44,7 +46,106 @@ func (a *API) ExternalProviderCallback(w http.ResponseWriter, r *http.Request) e
 }
 
 func (a *API) GetExternalProviderRedirectURL(w http.ResponseWriter, r *http.Request, linkingTargetUser *models.User) (string, error) {
-	return "", nil
+	ctx := r.Context()
+	db := a.db.WithContext(ctx)
+	config := a.config
+
+	query := r.URL.Query()
+	providerType := query.Get("provider")
+	scopes := query.Get("scopes")
+	codeChallenge := query.Get("code_challenge")
+	codeChallengeMethod := query.Get("code_challenge_method")
+
+	p, err := a.Provider(ctx, providerType, scopes)
+	if err != nil {
+		return "", badRequestError("Unsupported provider: %+v", err).WithInternalError(err)
+	}
+
+	inviteToken := query.Get("invite_token")
+	if inviteToken != "" {
+		_, userErr := models.FindUserByConfirmationToken(db, inviteToken)
+		if userErr != nil {
+			if models.IsNotFoundError(userErr) {
+				return "", notFoundError(userErr.Error())
+			}
+			return "", internalServerError("Database error finding user").WithInternalError(userErr)
+		}
+	}
+
+	redirectURL := utilities.GetReferrer(r, config)
+	// TODO: add log more here
+
+	if err := validatePKCEParams(codeChallengeMethod, codeChallenge); err != nil {
+		logrus.Error("validate pkce params error: ", err)
+		return "", err
+	}
+
+	flowType := getFlowFromChallenge(codeChallenge)
+	flowStateID := ""
+
+	if flowType == models.PKCEFlow {
+		codeChallengeMethodType, err := models.ParseCodeChallengeMethod(codeChallengeMethod)
+		if err != nil {
+			logrus.Error("parse code challenge method error: ", err)
+			return "", err
+		}
+
+		flowState, err := models.NewFlowState(providerType, codeChallenge, codeChallengeMethodType, models.OAuth)
+		if err != nil {
+			logrus.Error("new flow state error: ", err)
+			return "", err
+		}
+
+		if err := a.db.Create(flowState); err != nil {
+			logrus.Error("create flow state error: ", err)
+			return "", err
+		}
+		flowStateID = flowState.ID.String()
+	}
+
+	claims := ExternalProviderClaims{
+		AuthMicroserviceClaims: AuthMicroserviceClaims{
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+			},
+			SiteURL:    config.SiteURL,
+			InstanceID: uuid.Nil.String(),
+		},
+		Provider:    providerType,
+		InviteToken: inviteToken,
+		Referrer:    redirectURL,
+		FlowStateID: flowStateID,
+	}
+
+	if linkingTargetUser != nil {
+		// this means that the user is performing manual linking
+		claims.LinkingTargetID = linkingTargetUser.ID.String()
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(config.JWT.Secret))
+
+	if err != nil {
+		logrus.Error("sign token error: ", err)
+		return "", internalServerError("Error creating state").WithInternalError(err)
+	}
+
+	authUrlParams := make([]oauth2.AuthCodeOption, 0)
+	query.Del("scopes")
+	query.Del("provider")
+	query.Del("code_challenge")
+	query.Del("code_challenge_method")
+
+	for key := range query {
+		if key == "workos_provider" {
+			// See https://workos.com/docs/reference/sso/authorize/get
+			authUrlParams = append(authUrlParams, oauth2.SetAuthURLParam("provider", query.Get(key)))
+		} else {
+			authUrlParams = append(authUrlParams, oauth2.SetAuthURLParam(key, query.Get(key)))
+		}
+	}
+	authURL := p.AuthCodeURL(tokenString, authUrlParams...)
+	return authURL, nil
 }
 
 func (a *API) Provider(ctx context.Context, name string, scopes string) (provider.Provider, error) {

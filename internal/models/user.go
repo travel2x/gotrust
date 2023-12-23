@@ -167,6 +167,14 @@ func FindUserByID(tx *storage.Connection, id uuid.UUID) (*User, error) {
 	return findUser(tx, "instance_id = ? and id = ?", uuid.Nil, id)
 }
 
+func FindUserByConfirmationToken(tx *storage.Connection, token string) (*User, error) {
+	user, err := findUser(tx, "confirmation_token = ? and is_sso_user = false", token)
+	if err != nil {
+		return nil, ConfirmationTokenNotFoundError{}
+	}
+	return user, nil
+}
+
 func findUser(tx *storage.Connection, query string, args ...interface{}) (*User, error) {
 	u := &User{}
 	if err := tx.Eager().Q().Where(query, args...).First(u); err != nil {

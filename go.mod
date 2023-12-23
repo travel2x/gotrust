@@ -4,6 +4,7 @@ go 1.21.0
 
 require (
 	github.com/XSAM/otelsql v0.27.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobwas/glob v0.2.3
@@ -30,6 +31,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
@@ -70,7 +72,7 @@ require (
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

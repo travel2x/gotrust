@@ -2,6 +2,7 @@ package conf
 
 import (
 	"errors"
+	"net/url"
 	"os"
 	"time"
 
@@ -54,7 +55,7 @@ func LoadGlobal(filename string) (*GlobalConfiguration, error) {
 
 	config := new(GlobalConfiguration)
 
-	if err := envconfig.Process("aus", config); err != nil {
+	if err := envconfig.Process("gotrust", config); err != nil {
 		return nil, err
 	}
 	if err := config.ApplyDefaults(); err != nil {
@@ -81,105 +82,105 @@ func loadEnvironment(filename string) error {
 	return err
 }
 
-func (config *GlobalConfiguration) ApplyDefaults() error {
-	if config.JWT.AdminGroupName == "" {
-		config.JWT.AdminGroupName = "admin"
+func (c *GlobalConfiguration) ApplyDefaults() error {
+	if c.JWT.AdminGroupName == "" {
+		c.JWT.AdminGroupName = "admin"
 	}
 
-	if config.JWT.AdminRoles == nil || len(config.JWT.AdminRoles) == 0 {
-		config.JWT.AdminRoles = []string{"service_role", "aus_admin"}
+	if c.JWT.AdminRoles == nil || len(c.JWT.AdminRoles) == 0 {
+		c.JWT.AdminRoles = []string{"service_role", "aus_admin"}
 	}
 
-	if config.JWT.Exp == 0 {
-		config.JWT.Exp = 3600
+	if c.JWT.Exp == 0 {
+		c.JWT.Exp = 3600
 	}
 
-	if config.Mailer.Autoconfirm && config.Mailer.AllowUnverifiedEmailSignIns {
+	if c.Mailer.Autoconfirm && c.Mailer.AllowUnverifiedEmailSignIns {
 		return errors.New("cannot enable both GOTRUE_MAILER_AUTOCONFIRM and GOTRUE_MAILER_ALLOW_UNVERIFIED_EMAIL_SIGN_INS")
 	}
 
-	if config.Mailer.URLPaths.Invite == "" {
-		config.Mailer.URLPaths.Invite = "/verify"
+	if c.Mailer.URLPaths.Invite == "" {
+		c.Mailer.URLPaths.Invite = "/verify"
 	}
 
-	if config.Mailer.URLPaths.Confirmation == "" {
-		config.Mailer.URLPaths.Confirmation = "/verify"
+	if c.Mailer.URLPaths.Confirmation == "" {
+		c.Mailer.URLPaths.Confirmation = "/verify"
 	}
 
-	if config.Mailer.URLPaths.Recovery == "" {
-		config.Mailer.URLPaths.Recovery = "/verify"
+	if c.Mailer.URLPaths.Recovery == "" {
+		c.Mailer.URLPaths.Recovery = "/verify"
 	}
 
-	if config.Mailer.URLPaths.EmailChange == "" {
-		config.Mailer.URLPaths.EmailChange = "/verify"
+	if c.Mailer.URLPaths.EmailChange == "" {
+		c.Mailer.URLPaths.EmailChange = "/verify"
 	}
 
-	if config.Mailer.OtpExp == 0 {
-		config.Mailer.OtpExp = 86400 // 1 day
+	if c.Mailer.OtpExp == 0 {
+		c.Mailer.OtpExp = 86400 // 1 day
 	}
 
-	if config.Mailer.OtpLength == 0 || config.Mailer.OtpLength < 6 || config.Mailer.OtpLength > 10 {
+	if c.Mailer.OtpLength == 0 || c.Mailer.OtpLength < 6 || c.Mailer.OtpLength > 10 {
 		// 6-digit otp by default
-		config.Mailer.OtpLength = 6
+		c.Mailer.OtpLength = 6
 	}
 
-	if config.SMTP.MaxFrequency == 0 {
-		config.SMTP.MaxFrequency = 1 * time.Minute
+	if c.SMTP.MaxFrequency == 0 {
+		c.SMTP.MaxFrequency = 1 * time.Minute
 	}
 
-	if config.Sms.MaxFrequency == 0 {
-		config.Sms.MaxFrequency = 1 * time.Minute
+	if c.Sms.MaxFrequency == 0 {
+		c.Sms.MaxFrequency = 1 * time.Minute
 	}
 
-	if config.Sms.OtpExp == 0 {
-		config.Sms.OtpExp = 60
+	if c.Sms.OtpExp == 0 {
+		c.Sms.OtpExp = 60
 	}
 
-	if config.Sms.OtpLength == 0 || config.Sms.OtpLength < 6 || config.Sms.OtpLength > 10 {
+	if c.Sms.OtpLength == 0 || c.Sms.OtpLength < 6 || c.Sms.OtpLength > 10 {
 		// 6-digit otp by default
-		config.Sms.OtpLength = 6
+		c.Sms.OtpLength = 6
 	}
 
-	if len(config.Sms.Template) == 0 {
-		config.Sms.Template = ""
+	if len(c.Sms.Template) == 0 {
+		c.Sms.Template = ""
 	}
 
-	if config.Cookie.Key == "" {
-		config.Cookie.Key = "sb"
+	if c.Cookie.Key == "" {
+		c.Cookie.Key = "sb"
 	}
 
-	if config.Cookie.Domain == "" {
-		config.Cookie.Domain = ""
+	if c.Cookie.Domain == "" {
+		c.Cookie.Domain = ""
 	}
 
-	if config.Cookie.Duration == 0 {
-		config.Cookie.Duration = 86400
+	if c.Cookie.Duration == 0 {
+		c.Cookie.Duration = 86400
 	}
 
-	if config.URIAllowList == nil {
-		config.URIAllowList = []string{}
+	if c.URIAllowList == nil {
+		c.URIAllowList = []string{}
 	}
 
-	if config.URIAllowList != nil {
-		config.URIAllowListMap = make(map[string]glob.Glob)
-		for _, uri := range config.URIAllowList {
+	if c.URIAllowList != nil {
+		c.URIAllowListMap = make(map[string]glob.Glob)
+		for _, uri := range c.URIAllowList {
 			g := glob.MustCompile(uri, '.', '/')
-			config.URIAllowListMap[uri] = g
+			c.URIAllowListMap[uri] = g
 		}
 	}
 
-	if config.Password.MinLength < defaultMinPasswordLength {
-		config.Password.MinLength = defaultMinPasswordLength
+	if c.Password.MinLength < defaultMinPasswordLength {
+		c.Password.MinLength = defaultMinPasswordLength
 	}
 	// if config.MFA.ChallengeExpiryDuration < defaultChallengeExpiryDuration {
 	// 	config.MFA.ChallengeExpiryDuration = defaultChallengeExpiryDuration
 	// }
-	if config.External.FlowStateExpiryDuration < defaultFlowStateExpiryDuration {
-		config.External.FlowStateExpiryDuration = defaultFlowStateExpiryDuration
+	if c.External.FlowStateExpiryDuration < defaultFlowStateExpiryDuration {
+		c.External.FlowStateExpiryDuration = defaultFlowStateExpiryDuration
 	}
 
-	if len(config.External.AllowedIdTokenIssuers) == 0 {
-		config.External.AllowedIdTokenIssuers = append(config.External.AllowedIdTokenIssuers, "https://appleid.apple.com", "https://accounts.google.com")
+	if len(c.External.AllowedIdTokenIssuers) == 0 {
+		c.External.AllowedIdTokenIssuers = append(c.External.AllowedIdTokenIssuers, "https://appleid.apple.com", "https://accounts.google.com")
 	}
 
 	return nil
@@ -187,21 +188,21 @@ func (config *GlobalConfiguration) ApplyDefaults() error {
 
 // Validate validates all of configuration.
 func (c *GlobalConfiguration) Validate() error {
-	validatables := []interface {
+	validateTables := []interface {
 		Validate() error
 	}{
-		&c.SMTP,
 		&c.Security,
 		&c.Sessions,
-		// &c.API,
-		// &c.DB,
+		&c.API,
+		&c.DB,
+		//&c.SMTP,
 		// &c.Tracing,
 		// &c.Metrics,
 		// &c.SAML,
 		// &c.Hook,
 	}
 
-	for _, validatable := range validatables {
+	for _, validatable := range validateTables {
 		if err := validatable.Validate(); err != nil {
 			return err
 		}
@@ -223,6 +224,19 @@ func (o *OAuthProviderConfiguration) ValidateOAuth() error {
 	if o.RedirectURI == "" {
 		return errors.New("missing redirect URI")
 	}
+	return nil
+}
+
+func (a *APIConfiguration) Validate() error {
+	_, err := url.ParseRequestURI(a.ExternalURL)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *DBConfiguration) Validate() error {
 	return nil
 }
 

@@ -18,3 +18,6 @@ deps: ## Install dependencies.
 
 migrate_dev: ## Run database migrations for development.
 	hack/migrate.sh postgres
+
+start_postgres:
+	 docker-compose -f docker-compose-dev.yml up postgres
