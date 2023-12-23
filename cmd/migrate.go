@@ -55,15 +55,15 @@ func migrate(cmd *cobra.Command, args []string) {
 		processedUrl = fmt.Sprintf("%s?application_name=gotrust_migrations", processedUrl)
 	}
 
-	deets := &pop.ConnectionDetails{
+	connDetails := &pop.ConnectionDetails{
 		Dialect: globalConfig.DB.Driver,
 		URL:     processedUrl,
 	}
-	deets.Options = map[string]string{
+	connDetails.Options = map[string]string{
 		"migration_table_name": "schema_migrations",
 		"Namespace":            globalConfig.DB.Namespace,
 	}
-	db, err := pop.NewConnection(deets)
+	db, err := pop.NewConnection(connDetails)
 	if err != nil {
 		log.Fatalf("%+v", errors.Wrap(err, "opening db connection"))
 	}
