@@ -9,4 +9,5 @@ export GOTRUST_DB_DRIVER="postgres"
 export GOTRUST_DB_DATABASE_URL="postgres://travel2x_auth_admin:root@localhost:5432/$DB_ENV"
 export GOTRUST_DB_MIGRATIONS_PATH=$DIR/../migrations
 
+echo "Running migrations for $DIR"
 go run main.go migrate -c $DIR/test.env

@@ -40,6 +40,7 @@ type GlobalConfiguration struct {
 	Webhook         WebhookConfig            `json:"webhook" split_words:"true"`
 	Security        SecurityConfiguration    `json:"security"`
 	Sessions        SessionsConfiguration    `json:"sessions"`
+	DisableSignup   bool                     `json:"disable_signup" split_words:"true"`
 	Cookie          struct {
 		Key      string `json:"key"`
 		Domain   string `json:"domain"`

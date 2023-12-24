@@ -5,6 +5,8 @@ go 1.21.0
 require (
 	github.com/XSAM/otelsql v0.27.0
 	github.com/coreos/go-oidc/v3 v3.9.0
+	github.com/crewjam/saml v0.4.14
+	github.com/fatih/structs v1.1.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobwas/glob v0.2.3
@@ -29,8 +31,9 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/beevik/etree v1.1.0 // indirect
+	github.com/crewjam/httperr v0.2.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -44,6 +47,7 @@ require (
 	github.com/gobuffalo/plush/v4 v4.1.18 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.4 // indirect
 	github.com/gobuffalo/validate/v3 v3.3.3 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.3 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -54,13 +58,16 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.12.0 // indirect
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
+	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
+	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	github.com/russellhaering/goxmldsig v1.3.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d // indirect
 	github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e // indirect

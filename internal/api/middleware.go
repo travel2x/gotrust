@@ -17,20 +17,20 @@ type AuthMicroserviceClaims struct {
 	FunctionHooks FunctionHooks `json:"function_hooks"`
 }
 
-func (a *API) isValidExternalHost(w http.ResponseWriter, req *http.Request) (context.Context, error) {
-	ctx := req.Context()
-	config := a.config
-
+func (a *API) isValidExternalHost(w http.ResponseWriter, r *http.Request) (context.Context, error) {
 	var u *url.URL
 	var err error
 
+	ctx := r.Context()
+	config := a.config
 	baseUrl := config.API.ExternalURL
-	xForwardedHost := req.Header.Get("X-Forwarded-Host")
-	xForwardedProto := req.Header.Get("X-Forwarded-Proto")
+	xForwardedHost := r.Header.Get("X-Forwarded-Host")
+	xForwardedProto := r.Header.Get("X-Forwarded-Proto")
+
 	if xForwardedHost != "" && xForwardedProto != "" {
 		baseUrl = fmt.Sprintf("%s://%s", xForwardedProto, xForwardedHost)
-	} else if req.URL.Scheme != "" && req.URL.Hostname() != "" {
-		baseUrl = fmt.Sprintf("%s://%s", req.URL.Scheme, req.URL.Hostname())
+	} else if r.URL.Scheme != "" && r.URL.Hostname() != "" {
+		baseUrl = fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Hostname())
 	}
 	if u, err = url.ParseRequestURI(baseUrl); err != nil {
 		// fallback to the default hostname

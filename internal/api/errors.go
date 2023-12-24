@@ -135,3 +135,15 @@ func notFoundError(fmtString string, args ...interface{}) *HTTPError {
 func internalServerError(fmtString string, args ...interface{}) *HTTPError {
 	return httpError(http.StatusInternalServerError, fmtString, args...)
 }
+
+func oauthError(err string, description string) *OAuthError {
+	return &OAuthError{Err: err, Description: description}
+}
+
+func forbiddenError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusForbidden, fmtString, args...)
+}
+
+func unauthorizedError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusUnauthorized, fmtString, args...)
+}

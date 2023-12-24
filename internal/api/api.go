@@ -45,8 +45,8 @@ func NewAPIWithVersion(ctx context.Context, globalConfig *conf.GlobalConfigurati
 
 	xffmw, _ := xff.Default()
 	r := newRouter()
-	r.Use(addRequestID(globalConfig))
 
+	r.Use(addRequestID(globalConfig))
 	r.Use(recoverer)
 	r.UseBypass(xffmw.Handler)
 
@@ -62,7 +62,7 @@ func NewAPIWithVersion(ctx context.Context, globalConfig *conf.GlobalConfigurati
 		r.Use(api.isValidExternalHost)
 
 		r.Get("/authorize", api.ExternalProviderRedirect)
-		// http://localhost:8000/authorize?provider=google&redirect_uri=http://localhost:3000
+		// http://localhost:8000/authorize?provider=google&redirect_to=http://localhost:3000
 	})
 
 	corsHandler := cors.New(cors.Options{

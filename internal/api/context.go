@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt"
 	"github.com/travel2x/gotrust/internal/models"
 	"net/url"
 )
@@ -87,4 +88,58 @@ func getRequestID(ctx context.Context) string {
 		return ""
 	}
 	return val.(string)
+}
+
+func getExternalProviderType(ctx context.Context) string {
+	obj := ctx.Value(externalProviderTypeKey)
+	if obj == nil {
+		return ""
+	}
+
+	return obj.(string)
+}
+
+func getFlowStateID(ctx context.Context) string {
+	obj := ctx.Value(flowStateKey)
+	if obj == nil {
+		return ""
+	}
+	return obj.(string)
+}
+
+func getTargetUser(ctx context.Context) *models.User {
+	if ctx == nil {
+		return nil
+	}
+	obj := ctx.Value(targetUserKey)
+	if obj == nil {
+		return nil
+	}
+	return obj.(*models.User)
+}
+
+func getInviteToken(ctx context.Context) string {
+	obj := ctx.Value(inviteTokenKey)
+	if obj == nil {
+		return ""
+	}
+
+	return obj.(string)
+}
+
+func getToken(ctx context.Context) *jwt.Token {
+	obj := ctx.Value(tokenKey)
+	if obj == nil {
+		return nil
+	}
+
+	return obj.(*jwt.Token)
+}
+
+func getClaims(ctx context.Context) *AccessTokenClaims {
+	token := getToken(ctx)
+	if token == nil {
+		return nil
+	}
+	return token.Claims.(*AccessTokenClaims)
 }
