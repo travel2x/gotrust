@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/travel2x/gotrust/internal/models"
 	"github.com/travel2x/gotrust/internal/storage"
+	"net/http"
 )
 
 type SignupParams struct {
@@ -62,7 +64,7 @@ func (s *SignupParams) ToUserModel(isSSOUser bool) (user *models.User, err error
 	return
 }
 
-func (a *API) signupNewUser(ctx context.Context, conn *storage.Connection, user *models.User) (*models.User, error) {
+func (a *API) SignupNewUser(ctx context.Context, conn *storage.Connection, user *models.User) (*models.User, error) {
 	config := a.config
 
 	err := conn.Transaction(func(tx *storage.Connection) error {
@@ -84,4 +86,18 @@ func (a *API) signupNewUser(ctx context.Context, conn *storage.Connection, user 
 		return nil, internalServerError("Database error loading user after sign-up").WithInternalError(err)
 	}
 	return user, nil
+}
+
+func (a *API) Signup(w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
+	config := a.config
+	db := a.db.WithContext(ctx)
+
+	if config.DisableSignup {
+		return forbiddenError("Signups not allowed for this instance")
+	}
+	params := &SignupParams{}
+	fmt.Println(params, db)
+
+	return nil
 }

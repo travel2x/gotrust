@@ -34,7 +34,7 @@ func (r *Router) Delete(pattern string, fn apiHandler) {
 	r.chi.Delete(pattern, handler(fn))
 }
 
-func (r *Router) With(fn middlewareHandler) *Router {
+func (r *Router) With(fn MiddlewareHandler) *Router {
 	c := r.chi.With(middleware(fn))
 	return &Router{c}
 }
@@ -44,7 +44,7 @@ func (r *Router) WithBypass(fn func(next http.Handler) http.Handler) *Router {
 	return &Router{c}
 }
 
-func (r *Router) Use(fn middlewareHandler) {
+func (r *Router) Use(fn MiddlewareHandler) {
 	r.chi.Use(middleware(fn))
 }
 func (r *Router) UseBypass(fn func(next http.Handler) http.Handler) {
@@ -67,15 +67,15 @@ func (h apiHandler) serve(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type middlewareHandler func(w http.ResponseWriter, r *http.Request) (context.Context, error)
+type MiddlewareHandler func(w http.ResponseWriter, r *http.Request) (context.Context, error)
 
-func (m middlewareHandler) handler(next http.Handler) http.Handler {
+func (m MiddlewareHandler) handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		m.serve(next, w, r)
 	})
 }
 
-func (m middlewareHandler) serve(next http.Handler, w http.ResponseWriter, r *http.Request) {
+func (m MiddlewareHandler) serve(next http.Handler, w http.ResponseWriter, r *http.Request) {
 	ctx, err := m(w, r)
 	if err != nil {
 		handleError(err, w, r)
@@ -87,6 +87,6 @@ func (m middlewareHandler) serve(next http.Handler, w http.ResponseWriter, r *ht
 	next.ServeHTTP(w, r)
 }
 
-func middleware(fn middlewareHandler) func(http.Handler) http.Handler {
+func middleware(fn MiddlewareHandler) func(http.Handler) http.Handler {
 	return fn.handler
 }

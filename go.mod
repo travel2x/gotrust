@@ -33,6 +33,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beevik/etree v1.1.0 // indirect
 	github.com/crewjam/httperr v0.2.0 // indirect
+	github.com/didip/tollbooth/v5 v5.2.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
@@ -66,6 +67,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
+	github.com/patrickmn/go-cache v0.0.0-20170418232947-7ac151875ffb // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/russellhaering/goxmldsig v1.3.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
@@ -79,6 +81,7 @@ require (
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/time v0.0.0-20160926182426-711ca1cb8763 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

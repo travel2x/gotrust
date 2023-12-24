@@ -14,7 +14,7 @@ type OAuthProviderData struct {
 	code         string
 }
 
-func (a *API) loadFlowState(w http.ResponseWriter, r *http.Request) (context.Context, error) {
+func (a *API) LoadFlowState(w http.ResponseWriter, r *http.Request) (context.Context, error) {
 	var state string
 	if r.Method == http.MethodPost {
 		state = r.FormValue("state")

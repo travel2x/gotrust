@@ -48,7 +48,7 @@ func (r *AccessTokenResponse) AsRedirectURL(redirectURL string, extraParams url.
 	return redirectURL + "#" + extraParams.Encode()
 }
 
-func (a *API) setCookieToken(config *conf.GlobalConfiguration, name string, tokenString string, session bool, w http.ResponseWriter) error {
+func (a *API) SetCookieToken(config *conf.GlobalConfiguration, name string, tokenString string, session bool, w http.ResponseWriter) error {
 	if name == "" {
 		return errors.New("failed to set cookie, invalid name")
 	}
@@ -71,10 +71,10 @@ func (a *API) setCookieToken(config *conf.GlobalConfiguration, name string, toke
 	return nil
 }
 
-func (a *API) setCookieTokens(config *conf.GlobalConfiguration, token *AccessTokenResponse, session bool, w http.ResponseWriter) error {
+func (a *API) SetCookieTokens(config *conf.GlobalConfiguration, token *AccessTokenResponse, session bool, w http.ResponseWriter) error {
 	// don't need to catch error here since we always set the cookie name
-	_ = a.setCookieToken(config, "access-token", token.Token, session, w)
-	_ = a.setCookieToken(config, "refresh-token", token.RefreshToken, session, w)
+	_ = a.SetCookieToken(config, "access-token", token.Token, session, w)
+	_ = a.SetCookieToken(config, "refresh-token", token.RefreshToken, session, w)
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (a *API) issueRefreshToken(ctx context.Context, conn *storage.Connection, u
 			return transactionErr
 		}
 
-		tokenString, expiresAt, transactionErr = a.generateAccessToken(ctx, tx, user, refreshToken.SessionId, authenticationMethod)
+		tokenString, expiresAt, transactionErr = a.GenerateAccessToken(ctx, tx, user, refreshToken.SessionId, authenticationMethod)
 		if transactionErr != nil {
 			httpErr, ok := transactionErr.(*HTTPError)
 			if ok {
@@ -114,7 +114,7 @@ func (a *API) issueRefreshToken(ctx context.Context, conn *storage.Connection, u
 	}
 	return &AccessTokenResponse{
 		Token:        tokenString,
-		TokenType:    "bearer",
+		TokenType:    "Bearer",
 		ExpiresIn:    config.JWT.Exp,
 		ExpiresAt:    expiresAt,
 		RefreshToken: refreshToken.Token,
@@ -122,7 +122,7 @@ func (a *API) issueRefreshToken(ctx context.Context, conn *storage.Connection, u
 	}, nil
 }
 
-func (a *API) generateAccessToken(ctx context.Context, tx *storage.Connection, user *models.User, sessionId *uuid.UUID, authenticationMethod models.AuthenticationMethod) (string, int64, error) {
+func (a *API) GenerateAccessToken(ctx context.Context, tx *storage.Connection, user *models.User, sessionId *uuid.UUID, authenticationMethod models.AuthenticationMethod) (string, int64, error) {
 	config := a.config
 	aal, amr := models.AAL1.String(), []models.AMREntry{}
 	sid := ""

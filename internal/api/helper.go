@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func addRequestID(globalConfig *conf.GlobalConfiguration) middlewareHandler {
+func addRequestID(globalConfig *conf.GlobalConfiguration) MiddlewareHandler {
 	return func(w http.ResponseWriter, r *http.Request) (context.Context, error) {
 		id := ""
 		if globalConfig.API.RequestIDHeader != "" {

@@ -96,7 +96,7 @@ func httpError(code int, fmtString string, args ...interface{}) *HTTPError {
 
 func handleError(err error, w http.ResponseWriter, r *http.Request) {}
 
-func recoverer(w http.ResponseWriter, r *http.Request) (context.Context, error) {
+func recovered(w http.ResponseWriter, r *http.Request) (context.Context, error) {
 	defer func() {
 		if rvr := recover(); rvr != nil {
 

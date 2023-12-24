@@ -88,18 +88,15 @@ func (a *API) GetExternalProviderRedirectURL(w http.ResponseWriter, r *http.Requ
 	if flowType == models.PKCEFlow {
 		codeChallengeMethodType, err := models.ParseCodeChallengeMethod(codeChallengeMethod)
 		if err != nil {
-			logrus.Error("parse code challenge method error: ", err)
 			return "", err
 		}
 
 		flowState, err := models.NewFlowState(providerType, codeChallenge, codeChallengeMethodType, models.OAuth)
 		if err != nil {
-			logrus.Error("new flow state error: ", err)
 			return "", err
 		}
 
 		if err := a.db.Create(flowState); err != nil {
-			logrus.Error("create flow state error: ", err)
 			return "", err
 		}
 		flowStateID = flowState.ID.String()
@@ -128,7 +125,6 @@ func (a *API) GetExternalProviderRedirectURL(w http.ResponseWriter, r *http.Requ
 	tokenString, err := token.SignedString([]byte(config.JWT.Secret))
 
 	if err != nil {
-		logrus.Error("sign token error: ", err)
 		return "", internalServerError("Error creating state").WithInternalError(err)
 	}
 
@@ -146,8 +142,7 @@ func (a *API) GetExternalProviderRedirectURL(w http.ResponseWriter, r *http.Requ
 			authUrlParams = append(authUrlParams, oauth2.SetAuthURLParam(key, query.Get(key)))
 		}
 	}
-	authURL := p.AuthCodeURL(tokenString, authUrlParams...)
-	return authURL, nil
+	return p.AuthCodeURL(tokenString, authUrlParams...), nil
 }
 
 func (a *API) Provider(ctx context.Context, name string, scopes string) (provider.Provider, error) {
@@ -264,7 +259,7 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 		}
 		redirectURL = token.AsRedirectURL(redirectURL, q)
 
-		if err := a.setCookieTokens(config, token, false, w); err != nil {
+		if err := a.SetCookieTokens(config, token, false, w); err != nil {
 			return internalServerError("Failed to set JWT cookie. %s", err)
 		}
 	}
@@ -523,7 +518,7 @@ func (a *API) createAccountFromExternalIdentity(r *http.Request, tx *storage.Con
 		if err != nil {
 			return nil, err
 		}
-		if user, err = a.signupNewUser(ctx, tx, user); err != nil {
+		if user, err = a.SignupNewUser(ctx, tx, user); err != nil {
 			return nil, err
 		}
 
