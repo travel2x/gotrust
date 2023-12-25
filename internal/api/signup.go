@@ -118,7 +118,6 @@ func (a *API) Signup(w http.ResponseWriter, r *http.Request) error {
 
 	params.ConfigureDefaults()
 	if err := a.ValidateSignupParams(ctx, params); err != nil {
-		fmt.Println("Signup::Log::ValidateSignupParams ", err)
 		return err
 	}
 

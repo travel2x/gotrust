@@ -4,7 +4,7 @@ import "fmt"
 
 type HTTPError struct {
 	Code            int    `json:"code"`
-	Message         string `json:"msg"`
+	Message         string `json:"message"`
 	InternalError   error  `json:"-"`
 	InternalMessage string `json:"-"`
 	ErrorID         string `json:"error_id,omitempty"`
