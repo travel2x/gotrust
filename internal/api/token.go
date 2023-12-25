@@ -78,7 +78,7 @@ func (a *API) SetCookieTokens(config *conf.GlobalConfiguration, token *AccessTok
 	return nil
 }
 
-func (a *API) issueRefreshToken(ctx context.Context, conn *storage.Connection, user *models.User, authenticationMethod models.AuthenticationMethod, grantParams models.GrantParams) (*AccessTokenResponse, error) {
+func (a *API) IssueRefreshToken(ctx context.Context, conn *storage.Connection, user *models.User, authenticationMethod models.AuthenticationMethod, grantParams models.GrantParams) (*AccessTokenResponse, error) {
 	config := a.config
 	now := time.Now()
 	user.LastSignInAt = &now

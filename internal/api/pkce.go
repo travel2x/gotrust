@@ -48,4 +48,6 @@ func getFlowFromChallenge(codeChallenge string) models.FlowType {
 	}
 }
 
-// https://auth.supabase.io/auth/v1/authorize?provider=github&redirect_to=https%3A%2F%2Fsupabase.com%2Fdashboard%2Fsign-in-mfa%3FreturnTo%3D%252Fsign-in
+func isPKCEFlow(flowType models.FlowType) bool {
+	return flowType == models.PKCEFlow
+}

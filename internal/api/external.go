@@ -39,7 +39,7 @@ func (a *API) ExternalProviderRedirect(w http.ResponseWriter, r *http.Request) e
 }
 
 func (a *API) ExternalProviderCallback(w http.ResponseWriter, r *http.Request) error {
-	redirectURL := a.getExternalRedirectURL(r)
+	redirectURL := a.GetExternalRedirectURL(r)
 	u, err := url.Parse(redirectURL)
 	if err != nil {
 		return err
@@ -177,7 +177,7 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 	var grantParams models.GrantParams
 	grantParams.FillGrantParams(r)
 	providerType := getExternalProviderType(ctx)
-	data, err := a.handleOAuthCallback(w, r)
+	data, err := a.HandleOAuthCallback(w, r)
 	if err != nil {
 		return err
 	}
@@ -217,11 +217,11 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 				return transactionErr
 			}
 		} else if inviteToken := getInviteToken(ctx); inviteToken != "" {
-			if user, transactionErr = a.processInvite(r, ctx, tx, userData, inviteToken, providerType); transactionErr != nil {
+			if user, transactionErr = a.ProcessInvite(r, ctx, tx, userData, inviteToken, providerType); transactionErr != nil {
 				return transactionErr
 			}
 		} else {
-			if user, transactionErr = a.createAccountFromExternalIdentity(r, tx, userData, providerType); transactionErr != nil {
+			if user, transactionErr = a.CreateAccountFromExternalIdentity(r, tx, userData, providerType); transactionErr != nil {
 				return transactionErr
 			}
 		}
@@ -232,7 +232,7 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 			flowState.UserID = &(user.ID)
 			transactionErr = tx.Update(flowState)
 		} else {
-			token, transactionErr = a.issueRefreshToken(ctx, tx, user, models.OAuth, grantParams)
+			token, transactionErr = a.IssueRefreshToken(ctx, tx, user, models.OAuth, grantParams)
 		}
 		if transactionErr != nil {
 			return oauthError("server_error", transactionErr.Error())
@@ -243,7 +243,7 @@ func (a *API) internalExternalProviderCallback(w http.ResponseWriter, r *http.Re
 		return err
 	}
 
-	redirectURL := a.getExternalRedirectURL(r)
+	redirectURL := a.GetExternalRedirectURL(r)
 	if flowState != nil {
 		redirectURL, err = a.prepPKCERedirectURL(redirectURL, flowState.AuthCode)
 		if err != nil {
@@ -290,7 +290,7 @@ func (a *API) redirectErrors(handler apiHandler, w http.ResponseWriter, r *http.
 	}
 }
 
-func (a *API) getExternalRedirectURL(r *http.Request) string {
+func (a *API) GetExternalRedirectURL(r *http.Request) string {
 	ctx := r.Context()
 	config := a.config
 	if config.External.RedirectURL != "" {
@@ -378,7 +378,7 @@ func getErrorQueryString(err error, errorID string, q url.Values, log logrus.Fie
 	return &q
 }
 
-func (a *API) handleOAuthCallback(w http.ResponseWriter, r *http.Request) (*OAuthProviderData, error) {
+func (a *API) HandleOAuthCallback(w http.ResponseWriter, r *http.Request) (*OAuthProviderData, error) {
 	ctx := r.Context()
 	providerType := getExternalProviderType(ctx)
 
@@ -393,7 +393,7 @@ func (a *API) handleOAuthCallback(w http.ResponseWriter, r *http.Request) (*OAut
 	return oAuthResponseData, err
 }
 
-func (a *API) createNewIdentity(tx *storage.Connection, user *models.User, providerType string, metadata map[string]interface{}) (*models.Identity, error) {
+func (a *API) CreateNewIdentity(tx *storage.Connection, user *models.User, providerType string, metadata map[string]interface{}) (*models.Identity, error) {
 	identity, err := models.NewIdentity(user, providerType, metadata)
 	if err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func (a *API) createNewIdentity(tx *storage.Connection, user *models.User, provi
 	return identity, nil
 }
 
-func (a *API) processInvite(r *http.Request, ctx context.Context, tx *storage.Connection, userData *provider.UserProvidedData, inviteToken, providerType string) (*models.User, error) {
+func (a *API) ProcessInvite(r *http.Request, ctx context.Context, tx *storage.Connection, userData *provider.UserProvidedData, inviteToken, providerType string) (*models.User, error) {
 	user, err := models.FindUserByConfirmationToken(tx, inviteToken)
 	if err != nil {
 		if models.IsNotFoundError(err) {
@@ -432,7 +432,7 @@ func (a *API) processInvite(r *http.Request, ctx context.Context, tx *storage.Co
 	if userData.Metadata != nil {
 		identityData = structs.Map(userData.Metadata)
 	}
-	identity, err := a.createNewIdentity(tx, user, providerType, identityData)
+	identity, err := a.CreateNewIdentity(tx, user, providerType, identityData)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ func (a *API) processInvite(r *http.Request, ctx context.Context, tx *storage.Co
 	return user, nil
 }
 
-func (a *API) createAccountFromExternalIdentity(r *http.Request, tx *storage.Connection, userData *provider.UserProvidedData, providerType string) (*models.User, error) {
+func (a *API) CreateAccountFromExternalIdentity(r *http.Request, tx *storage.Connection, userData *provider.UserProvidedData, providerType string) (*models.User, error) {
 	ctx := r.Context()
 	config := a.config
 	aud := a.requestAud(ctx, r)
@@ -492,7 +492,7 @@ func (a *API) createAccountFromExternalIdentity(r *http.Request, tx *storage.Con
 	switch decision.Decision {
 	case models.LinkAccount:
 		user = decision.User
-		if identity, err = a.createNewIdentity(tx, user, providerType, identityData); err != nil {
+		if identity, err = a.CreateNewIdentity(tx, user, providerType, identityData); err != nil {
 			return nil, err
 		}
 		if err = user.UpdateAppMetaDataProviders(tx); err != nil {
@@ -522,7 +522,7 @@ func (a *API) createAccountFromExternalIdentity(r *http.Request, tx *storage.Con
 			return nil, err
 		}
 
-		if identity, err = a.createNewIdentity(tx, user, providerType, identityData); err != nil {
+		if identity, err = a.CreateNewIdentity(tx, user, providerType, identityData); err != nil {
 			return nil, err
 		}
 	case models.AccountExists:

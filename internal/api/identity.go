@@ -24,7 +24,7 @@ func (a *API) linkIdentityToUser(ctx context.Context, tx *storage.Connection, us
 		return nil, badRequestError("Identity is already linked to another user")
 	}
 
-	if _, err := a.createNewIdentity(tx, targetUser, providerType, structs.Map(userData.Metadata)); err != nil {
+	if _, err := a.CreateNewIdentity(tx, targetUser, providerType, structs.Map(userData.Metadata)); err != nil {
 		return nil, err
 	}
 

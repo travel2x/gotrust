@@ -1,7 +1,9 @@
 package utilities
 
 import (
+	"bytes"
 	"github.com/travel2x/gotrust/internal/conf"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -81,4 +83,21 @@ func getRedirectTo(r *http.Request) (reqReferrer string) {
 		reqReferrer = r.Form.Get("redirect_to")
 	}
 	return
+}
+
+func GetBodyBytes(r *http.Request) ([]byte, error) {
+	if r.Body == nil || r.Body == http.NoBody {
+		return nil, nil
+	}
+	originalBody := r.Body
+	defer SafeClose(originalBody)
+
+	buf, err := io.ReadAll(originalBody)
+	if err != nil {
+		return nil, err
+	}
+
+	r.Body = io.NopCloser(bytes.NewReader(buf))
+
+	return buf, nil
 }

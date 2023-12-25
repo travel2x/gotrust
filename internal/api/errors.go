@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/travel2x/gotrust/internal/conf"
 	"net/http"
 )
 
@@ -13,6 +15,14 @@ var OAuthErrorMap = map[int]string{
 	http.StatusInternalServerError: "server_error",
 	http.StatusServiceUnavailable:  "temporarily_unavailable",
 }
+
+var (
+	DuplicateEmailMsg       = "A user with this email address has already been registered"
+	DuplicatePhoneMsg       = "A user with this phone number has already been registered"
+	UserExistsError   error = errors.New("user already exists")
+)
+
+const InvalidChannelError = "Invalid channel, supported values are 'sms' or 'whatsapp'"
 
 type HTTPError struct {
 	Code            int    `json:"code"`
@@ -146,4 +156,31 @@ func forbiddenError(fmtString string, args ...interface{}) *HTTPError {
 
 func unauthorizedError(fmtString string, args ...interface{}) *HTTPError {
 	return httpError(http.StatusUnauthorized, fmtString, args...)
+}
+
+func unprocessableEntityError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusUnprocessableEntity, fmtString, args...)
+}
+
+func invalidSignupError(config *conf.GlobalConfiguration) *HTTPError {
+	var msg string
+	if config.External.Email.Enabled && config.External.Phone.Enabled {
+		msg = "To signup, please provide your email or phone number"
+	} else if config.External.Email.Enabled {
+		msg = "To signup, please provide your email"
+	} else if config.External.Phone.Enabled {
+		msg = "To signup, please provide your phone number"
+	} else {
+		// 3rd party OAuth signups
+		msg = "To signup, please provide required fields"
+	}
+	return unprocessableEntityError(msg)
+}
+
+func notImplementedError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusNotImplemented, fmtString, args...)
+}
+
+func tooManyRequestsError(fmtString string, args ...interface{}) *HTTPError {
+	return httpError(http.StatusTooManyRequests, fmtString, args...)
 }

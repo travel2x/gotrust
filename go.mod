@@ -4,8 +4,10 @@ go 1.21.0
 
 require (
 	github.com/XSAM/otelsql v0.27.0
+	github.com/badoux/checkmail v1.2.1
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/crewjam/saml v0.4.14
+	github.com/didip/tollbooth/v5 v5.2.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/gobuffalo/pop/v6 v6.1.1
@@ -33,7 +35,6 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beevik/etree v1.1.0 // indirect
 	github.com/crewjam/httperr v0.2.0 // indirect
-	github.com/didip/tollbooth/v5 v5.2.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
